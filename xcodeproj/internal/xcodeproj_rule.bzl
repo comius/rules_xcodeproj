@@ -1501,8 +1501,8 @@ configurations: {}""".format(", ".join(xcode_configurations)))
     inputs = input_files.merge(
         transitive_infos = infos,
     )
-    focused_labels = {label: None for label in ctx.attr.focused_labels}
-    unfocused_labels = {label: None for label in ctx.attr.unfocused_labels}
+    focused_labels = {label: None for label in ctx.attr._focused_labels}
+    unfocused_labels = {label: None for label in ctx.attr._unfocused_labels}
     replacement_labels = {
         r.id: r.label
         for r in depset(
@@ -1539,7 +1539,7 @@ configurations: {}""".format(", ".join(xcode_configurations)))
         is_fixture = is_fixture,
         link_params_processor = ctx.executable._link_params_processor,
         name = name,
-        owned_extra_files = ctx.attr.owned_extra_files,
+        owned_extra_files = ctx.attr._owned_extra_files,
         replacement_labels = replacement_labels,
         unfocused_labels = unfocused_labels,
     )
@@ -1812,8 +1812,11 @@ done
 def make_xcodeproj_rule(
         *,
         xcodeproj_aspect,
+        focused_labels,
         is_fixture = False,
+        owned_extra_files,
         target_transitions = None,
+        unfocused_labels,
         xcodeproj_transition = None):
     attrs = {
         "adjust_schemes_for_swiftui_previews": attr.bool(
@@ -1836,7 +1839,6 @@ def make_xcodeproj_rule(
         "fail_for_invalid_extra_files_targets": attr.bool(
             mandatory = True,
         ),
-        "focused_labels": attr.string_list(mandatory = True),
         "install_path": attr.string(
             mandatory = True,
         ),
@@ -1847,10 +1849,6 @@ def make_xcodeproj_rule(
             mandatory = True,
         ),
         "minimum_xcode_version": attr.string(
-            mandatory = True,
-        ),
-        "owned_extra_files": attr.label_keyed_string_dict(
-            allow_files = True,
             mandatory = True,
         ),
         "post_build": attr.string(
@@ -1896,7 +1894,6 @@ def make_xcodeproj_rule(
         "tvos_simulator_cpus": attr.string(
             mandatory = True,
         ),
-        "unfocused_labels": attr.string_list(mandatory = True),
         "unowned_extra_files": attr.label_list(
             allow_files = True,
             mandatory = True,
@@ -1947,6 +1944,7 @@ def make_xcodeproj_rule(
             default = Label("//tools/extensionpointidentifiers_parser"),
             executable = True,
         ),
+        "_focused_labels": attr.string_list(default = focused_labels),
         "_generator": attr.label(
             cfg = "exec",
             default = Label("//tools/generators/legacy:universal_generator"),
@@ -1967,6 +1965,10 @@ def make_xcodeproj_rule(
             default = Label("//tools/params_processors:link_params_processor"),
             executable = True,
         ),
+        "_owned_extra_files": attr.label_keyed_string_dict(
+            allow_files = True,
+            default = owned_extra_files,
+        ),
         "_swift_debug_settings_processor": attr.label(
             cfg = "exec",
             default = Label(
@@ -1974,6 +1976,7 @@ def make_xcodeproj_rule(
             ),
             executable = True,
         ),
+        "_unfocused_labels": attr.string_list(default = unfocused_labels),
         "_xccurrentversions_parser": attr.label(
             cfg = "exec",
             default = Label("//tools/xccurrentversions_parser"),
