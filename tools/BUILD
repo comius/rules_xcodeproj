@@ -6,6 +6,7 @@ load("//xcodeproj/internal:collections.bzl", "flatten", "uniq")
 _TOOLS = {
     "compiler_build_settings": "//tools/generators/compiler_build_settings",
     "files_and_groups": "//tools/generators/files_and_groups",
+    "pbxnativetargets": "//tools/generators/pbxnativetargets",
     "pbxproj_prefix": "//tools/generators/pbxproj_prefix",
     "pbxtargetdependencies": "//tools/generators/pbxtargetdependencies",
     "swiftc_stub": "//tools/swiftc_stub:swiftc",
@@ -18,6 +19,11 @@ _TESTS = {
     "files_and_groups": [
         "//tools/generators/lib/PBXProj:PBXProjTests",
         "//tools/generators/files_and_groups:files_and_groups_tests",
+    ],
+    "pbxnativetargets": [
+        "//tools/generators/lib/PBXProj:PBXProjTests",
+        "//tools/generators/lib/XCScheme:XCSchemeTests",
+        "//tools/generators/pbxnativetargets:pbxnativetargets_tests",
     ],
     "pbxproj_prefix": [
         "//tools/generators/lib/PBXProj:PBXProjTests",
@@ -223,6 +229,114 @@ _SCHEMES = [
         ),
     ),
     xcode_schemes.scheme(
+        name = "pbxnativetargets",
+        launch_action = xcode_schemes.launch_action(
+            _TOOLS["pbxnativetargets"],
+            args = [
+                # targetsOutputPath
+                "/tmp/pbxproj_partials/pbxnativetargets/0",
+                # buildFileSubIdentifiersOutputPath
+                "/tmp/pbxproj_partials/buildfile_subidentifiers/0",
+                # xcshemesOutputDirectory
+                "/tmp/pbxproj_partials/automatic_xcschemes/0",
+                # consolidationMap
+                "/tmp/pbxproj_partials/consolidation_maps/0",
+                # defaultXcodeConfiguration
+                "Debug",
+                # topLevelTargets
+                # targets
+                "--targets",
+                "'//tools/generators/legacy:generator applebin_macos-darwin_x86_64-dbg-STABLE-3'",
+                "'//tools/generators/legacy/test:tests.__internal__.__test_bundle applebin_macos-darwin_x86_64-dbg-STABLE-3'",
+                # xcodeConfigurationCounts
+                "--xcode-configuration-counts",
+                "2",
+                "1",
+                # xcodeConfigurations
+                "--xcode-configurations",
+                "Debug",
+                "Profile",
+                "Debug",
+                # productTypes
+                "--product-types",
+                "T",
+                "u",
+                # packageBinDirs
+                "--package-bin-dirs",
+                "applebin_macos-darwin_x86_64-dbg-STABLE-3/bin",
+                "applebin_macos-darwin_x86_64-dbg-STABLE-3/bin",
+                # productNames
+                "--product-names",
+                "generator",
+                "tests",
+                # productPaths
+                "--product-paths",
+                "bazel-out/applebin_macos-darwin_x86_64-dbg-STABLE-3/bin/tools/generators/legacy/generator",
+                "bazel-out/applebin_macos-darwin_x86_64-dbg-STABLE-3/bin/tools/generators/legacy/test/tests.__internal__.__test_bundle_archive-root/tests.xctest",
+                # productBasenames
+                "--product-basenames",
+                "generator_codesigned",
+                "tests.xctest",
+                # moduleNames
+                "--module-names",
+                "generator",
+                "tests",
+                # platforms
+                "--platforms",
+                "macosx",
+                "macosx",
+                # osVersions
+                "--os-versions",
+                "12.0",
+                "12.0",
+                # archs
+                "--archs",
+                "x86_64",
+                "x86_64",
+                # compilerBuildSettingsFiles
+                "--compiler-build-settings-files",
+                "/tmp/pbxproj_partials/compiler_build_settings",
+                # FIXME: adjust `args` to quote spaces when sending to Xcode?
+                '""',
+                # hasCParams
+                "--has-c-params",
+                "0",
+                "0",
+                # hasCxxParams
+                "--has-cxx-params",
+                "0",
+                "0",
+                # srcsCounts
+                "--srcs-counts",
+                "0",
+                "2",
+                # srcs
+                "--srcs",
+                "tools/generators/legacy/test/AddTargetsTests.swift",
+                "tools/generators/legacy/test/Array+ExtensionsTests.swift",
+                # nonArcSrcsCounts
+                # nonArcSrcs
+                # hdrsCounts
+                # hdrs
+                # resourcesCounts
+                # resources
+                # folderResourcesCounts
+                # folderResources
+                # dsymPaths
+                "--dsym-paths",
+                # FIXME: adjust `args` to quote spaces when sending to Xcode?
+                '""',
+                '""',
+            ],
+            build_configuration = "Release",
+            diagnostics = _SCHEME_DIAGNOSTICS,
+        ),
+        test_action = xcode_schemes.test_action(
+            _TESTS["pbxnativetargets"],
+            diagnostics = _SCHEME_DIAGNOSTICS,
+        ),
+    ),
+    xcode_schemes.scheme(
         name = "pbxproj_prefix",
         launch_action = xcode_schemes.launch_action(
             _TOOLS["pbxproj_prefix"],
@@ -404,6 +518,9 @@ xcodeproj(
         ],
         "//tools/generators/files_and_groups": [
             "//tools/generators/files_and_groups:README.md",
+        ],
+        "//tools/generators/pbxnativetargets": [
+            "//tools/generators/pbxnativetargets:README.md",
         ],
         "//tools/generators/pbxproj_prefix": [
             "//tools/generators/pbxproj_prefix:README.md",
