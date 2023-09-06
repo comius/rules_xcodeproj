@@ -77,6 +77,7 @@ extension Generator.InnerIdentifyTargets {
                     label: disambiguatedTarget.target.label,
                     productType: disambiguatedTarget.target.productType,
                     name: disambiguatedTarget.name,
+                    productBasename: aTarget.productBasename,
                     uiTestHostName: disambiguatedTarget
                         .target.uiTestHost.flatMap { idsToNames[$0] },
                     identifier: identifier,

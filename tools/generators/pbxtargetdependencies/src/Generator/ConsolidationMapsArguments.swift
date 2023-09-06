@@ -135,6 +135,17 @@ use an empty string.
     @Option(
         parsing: .upToNextOption,
         help: """
+Basename of the (potentially modified) product path for all of the targets.
+There must be exactly as basenames as there are targets. This is possibly \
+different from 'basename(productPath)', because it might reference a \
+post-processed product (e.g. "tool_codesigned" instead of "tool").
+"""
+    )
+    var productBasenames: [String]
+
+    @Option(
+        parsing: .upToNextOption,
+        help: """
 Number of dependencies per target. For example, '--dependency-counts 2 3' \
 means the first target (as specified by <targets>) should include the first \
 two dependencies from <dependencies>, and the second target should include the \
@@ -236,6 +247,13 @@ elements as <targets> (\(targets.count) elements).
 """)
         }
 
+        guard productBasenames.count == targets.count else {
+            throw ValidationError("""
+<product-basenames> (\(productBasenames.count) elements) must have exactly as \
+many elements as <targets> (\(targets.count) elements).
+""")
+        }
+
         guard dependencyCounts.count == targets.count else {
             throw ValidationError("""
 <dependency-counts> (\(dependencyCounts.count) elements) must have exactly as \
@@ -322,6 +340,7 @@ extension ConsolidationMapsArguments {
                             osVersion: osVersions[targetIndex],
                             arch: archs[targetIndex],
                             moduleName: moduleNames[targetIndex],
+                            productBasename: productBasenames[targetIndex],
                             uiTestHost: uiTestHost,
                             dependencies: dependencies
                         )

@@ -40,6 +40,20 @@ struct Generator {
         let identifiers = environment
             .calculateTargetIdentifierMap(identifiedTargets: identifiedTargets)
 
+        let writeAutomaticSchemesTask = Task {
+            try await environment.writeAutomaticSchemes(
+                defaultXcodeConfiguration: arguments.defaultXcodeConfiguration,
+                extensionHostIDs: arguments.extensionHostIDs,
+                identifiedTargets: identifiedTargets,
+                referencedContainer:
+                    environment.calculateSchemeReferencedContainer(
+                        installPath: arguments.installPath,
+                        workspace: arguments.workspace
+                    ),
+                to: arguments.xcshemesOutputDirectory
+            )
+        }
+
         let writeConsolidationMapsTask = Task {
             try await environment.writeConsolidationMaps(
                 try environment.calculateConsolidationMaps(
@@ -80,6 +94,7 @@ struct Generator {
         }
 
         // Wait for all of the writes to complete
+        try await writeAutomaticSchemesTask.value
         try await writeConsolidationMapsTask.value
         try await writeTargetsTask.value
         try await writeTargetAttributesTask.value

@@ -8,6 +8,9 @@ load(":platforms.bzl", "PLATFORM_NAME")
 def _apple_platform_to_platform_name(platform):
     return PLATFORM_NAME[platform]
 
+def _hosted_target(hosted_target):
+    return [hosted_target.hosted, hosted_target.host]
+
 def _depset_len(d):
     return str(len(d.to_list()))
 
@@ -38,7 +41,9 @@ _flags = struct(
     platforms = "--platforms",
     post_build_script = "--post-build-script",
     pre_build_script = "--pre-build-script",
+    product_basenames = "--product-basenames",
     product_types = "--product-types",
+    target_and_extension_hosts = "--target-and-extension-hosts",
     target_and_test_hosts = "--target-and-test-hosts",
     target_counts = "--target-counts",
     targets = "--targets",
@@ -350,10 +355,13 @@ def _write_pbxtargetdependencies(
         actions,
         apple_platform_to_platform_name = _apple_platform_to_platform_name,
         colorize,
+        default_xcode_configuration,
         generator_name,
+        hosted_targets,
         install_path,
         minimum_xcode_version,
         tool,
+        workspace_directory,
         xcode_target_configurations,
         xcode_targets_by_label):
     """Creates `File`s representing consolidated target in a `PBXProj`.
@@ -362,19 +370,26 @@ def _write_pbxtargetdependencies(
         actions: `ctx.actions`.
         apple_platform_to_platform_name: Exposed for testing. Don't set.
         colorize: A `bool` indicating whether to colorize the output.
+        default_xcode_configuration: The name of the the Xcode configuration to
+            use when building, if not overridden by custom schemes.
         generator_name: The name of the `xcodeproj` generator target.
+        hosted_targets: A `depset` of `struct`s with `host` and `hosted` fields.
+            The `host` field is the target ID of the hosting target. The
+            `hosted` field is the target ID of the hosted target.
         install_path: The workspace relative path to where the final
             `.xcodeproj` will be written.
         minimum_xcode_version: The minimum Xcode version that the generated
             project supports, as a `string`.
         tool: The executable that will generate the output files.
+        workspace_directory: The absolute path to the Bazel workspace
+            directory.
         xcode_target_configurations: A `dict` mapping `xcode_target.id` to a
             `list` of Xcode configuration names that the target is present in.
         xcode_targets_by_label:  A `dict` mapping `xcode_target.label` to a
             `dict` mapping `xcode_target.id` to `xcode_target`s.
 
     Returns:
-        A tuple with four elements:
+        A tuple with five elements:
 
         *   `pbxtargetdependencies`: The `File` for the
             `PBXTargetDependency` and `PBXContainerItemProxy` `PBXProj` partial.
@@ -385,6 +400,8 @@ def _write_pbxtargetdependencies(
         *   `consolidation_maps`: A `dict` mapping `File`s containing
             target consolidation maps to a `list` of `Label`s of the targets
             included in the map.
+        *   `automatic_xcschemes`: A `File` for the directory containing
+            automatically generated `.xcscheme`s.
     """
     pbxtargetdependencies = actions.declare_file(
         "{}_pbxproj_partials/pbxtargetdependencies".format(
@@ -400,6 +417,9 @@ def _write_pbxtargetdependencies(
         "{}_pbxproj_partials/pbxproject_target_attributes".format(
             generator_name,
         ),
+    )
+    automatic_xcschemes = actions.declare_directory(
+        "{}_pbxproj_partials/automatic_xcschemes".format(generator_name),
     )
 
     bucketed_labels = {}
@@ -422,8 +442,20 @@ def _write_pbxtargetdependencies(
     # targetAttributesOutputPath
     args.add(pbxproject_target_attributes)
 
+    # xcshemesOutputDirectory
+    args.add(automatic_xcschemes.path)
+
     # minimumXcodeVersion
     args.add(minimum_xcode_version)
+
+    # defaultXcodeConfiguration
+    args.add(default_xcode_configuration)
+
+    # workspace
+    args.add(workspace_directory)
+
+    # installPath
+    args.add(install_path)
 
     archs = []
     dependencies = []
@@ -433,6 +465,7 @@ def _write_pbxtargetdependencies(
     module_names = []
     os_versions = []
     platforms = []
+    product_basenames = []
     product_types = []
     target_and_test_hosts = []
     target_counts = []
@@ -463,6 +496,7 @@ def _write_pbxtargetdependencies(
                 module_names.append(
                     xcode_target.product.module_name_attribute or EMPTY_STRING,
                 )
+                product_basenames.append(xcode_target.product.basename)
                 dependency_counts.append(xcode_target.dependencies)
                 dependencies.append(xcode_target.dependencies)
 
@@ -476,6 +510,13 @@ def _write_pbxtargetdependencies(
 
     # targetAndTestHosts
     args.add_all(_flags.target_and_test_hosts, target_and_test_hosts)
+
+    # targetAndExtensionHosts
+    args.add_all(
+        _flags.target_and_extension_hosts,
+        hosted_targets,
+        map_each = _hosted_target,
+    )
 
     # consolidationMapOutputPaths
     args.add_all(
@@ -527,6 +568,9 @@ def _write_pbxtargetdependencies(
     # moduleNames
     args.add_all(_flags.module_names, module_names)
 
+    # productBasenames
+    args.add_all(_flags.product_basenames, product_basenames)
+
     # dependencyCounts
     args.add_all(
         _flags.dependency_counts,
@@ -552,6 +596,7 @@ def _write_pbxtargetdependencies(
             pbxtargetdependencies,
             pbxproject_targets,
             pbxproject_target_attributes,
+            automatic_xcschemes,
         ] + consolidation_maps.keys(),
         mnemonic = "WritePBXProjPBXTargetDependencies",
         progress_message = message,
@@ -562,6 +607,7 @@ def _write_pbxtargetdependencies(
         pbxproject_targets,
         pbxproject_target_attributes,
         consolidation_maps,
+        automatic_xcschemes,
     )
 
 pbxproj_partials = struct(

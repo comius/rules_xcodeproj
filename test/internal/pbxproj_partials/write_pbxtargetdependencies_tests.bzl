@@ -102,6 +102,7 @@ def _write_pbxtargetdependencies_test_impl(ctx):
         actions = actions.mock,
         apple_platform_to_platform_name = mock_apple_platform_to_platform_name,
         colorize = ctx.attr.colorize,
+        default_xcode_configuration = ctx.attr.default_xcode_configuration,
         generator_name = "a_generator_name",
         install_path = "a/project.xcodeproj",
         minimum_xcode_version = ctx.attr.minimum_xcode_version,
@@ -187,6 +188,7 @@ write_pbxtargetdependencies_test = unittest.make(
     attrs = {
         # Inputs
         "colorize": attr.bool(mandatory = True),
+        "default_xcode_configuration": attr.string(mandatory = True),
 
         # Expected
         "expected_args": attr.string_list(mandatory = True),
@@ -238,6 +240,7 @@ def write_pbxtargetdependencies_test_suite(name):
 
         # Inputs
         colorize = True,
+        defaultXcodeConfiguration = "Release",
         minimum_xcode_version = "14.3.1",
         xcode_target_configurations = {
             "//tools/generators/legacy/test:tests.__internal__.__test_bundle applebin_macos-darwin_x86_64-dbg-STABLE-3": ["Release"],
@@ -295,6 +298,8 @@ def write_pbxtargetdependencies_test_suite(name):
             _TARGET_ATTRIBUTES_DECLARED_FILE,
             # minimumXcodeVersion
             "14.3.1",
+            # defaultXcodeConfiguration
+            "Release",
             # targetAndTestHosts
             "--target-and-test-hosts",
             "'//tools/generators/legacy/test:tests.__internal__.__test_bundle applebin_macos-darwin_x86_64-dbg-STABLE-3'",
@@ -358,6 +363,11 @@ def write_pbxtargetdependencies_test_suite(name):
             "tests",
             "",
             "generator",
+            # productBasenames
+            "--product-basenames",
+            "tests.xctest",
+            "libgenerator.a",
+            "generator_codesigned",
             # dependencyCounts
             "--dependency-counts",
             "1",

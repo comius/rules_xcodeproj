@@ -1,4 +1,5 @@
 import PBXProj
+import XCScheme
 
 extension Generator {
     /// Provides the callable dependencies for `Generator`.
@@ -9,6 +10,9 @@ extension Generator {
         let calculateConsolidationMaps: CalculateConsolidationMaps
 
         let calculateCreatedOnToolsVersion: CalculateCreatedOnToolsVersion
+
+        let calculateSchemeReferencedContainer:
+            CalculateSchemeReferencedContainer
 
         let calculateTargetAttributesPartial: CalculateTargetAttributesPartial
 
@@ -27,6 +31,8 @@ extension Generator {
 
         let write: Write
 
+        let writeAutomaticSchemes: WriteAutomaticSchemes
+
         let writeConsolidationMaps: WriteConsolidationMaps
     }
 }
@@ -36,6 +42,8 @@ extension Generator.Environment {
         calculateConsolidationMaps: Generator.CalculateConsolidationMaps(),
         calculateCreatedOnToolsVersion:
             Generator.CalculateCreatedOnToolsVersion(),
+        calculateSchemeReferencedContainer:
+            Generator.CalculateSchemeReferencedContainer(),
         calculateTargetAttributesPartial:
             Generator.CalculateTargetAttributesPartial(),
         calculateTargetDependenciesPartial:
@@ -60,6 +68,12 @@ extension Generator.Environment {
             )
         ),
         write: Write(),
+        writeAutomaticSchemes: Generator.WriteAutomaticSchemes(
+            createAutomaticScheme: Generator.CreateAutomaticScheme(
+                createScheme: CreateScheme()
+            ),
+            write: Write()
+        ),
         writeConsolidationMaps: Generator.WriteConsolidationMaps(
             writeConsolidationMap: Generator.WriteConsolidationMap()
         )

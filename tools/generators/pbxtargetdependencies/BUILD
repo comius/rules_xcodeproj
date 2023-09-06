@@ -21,6 +21,7 @@ swift_library(
     deps = [
         "//tools/generators/lib/GeneratorCommon",
         "//tools/generators/lib/PBXProj",
+        "//tools/generators/lib/XCScheme",
         "@com_github_apple_swift_argument_parser//:ArgumentParser",
         "@com_github_apple_swift_collections//:OrderedCollections",
     ],

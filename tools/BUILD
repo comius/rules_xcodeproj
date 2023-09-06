@@ -394,10 +394,17 @@ _SCHEMES = [
                 "/tmp/pbxproj_partials/pbxproject_target_attributes",
                 # minimumXcodeVersion
                 "14.0",
+                # defaultXcodeConfiguration
+                "Debug",
+                # workspace
+                "/tmp/workspace",
+                # installPath
+                "some/project.xcodeproj",
                 # targetAndTestHosts
                 "--target-and-test-hosts",
                 "'//tools/generators/legacy/test:tests.__internal__.__test_bundle applebin_macos-darwin_x86_64-dbg-STABLE-3'",
                 "'//tools/generators/legacy:generator applebin_macos-darwin_x86_64-dbg-STABLE-3'",
+                # targetAndExtensionHosts
                 # consolidationMapOutputPaths
                 "--consolidation-map-output-paths",
                 "/tmp/pbxproj_partials/consolidation_maps/0",
@@ -457,6 +464,11 @@ _SCHEMES = [
                 "''",
                 "tests",
                 "generator",
+                # productBasenames
+                "--product-basenames",
+                "generator_codesigned",
+                "tests.xctest",
+                "libgenerator.a",
                 # dependencyCounts
                 "--dependency-counts",
                 "1",
